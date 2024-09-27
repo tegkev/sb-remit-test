@@ -1,0 +1,55 @@
+version: '3.0'
+services:
+    app:
+        build:
+            context: .
+            dockerfile: Dockerfile
+        container_name: laravel_backend
+        restart: unless-stopped
+        env_file:
+            - .env
+        working_dir: /var/www/
+        volumes:
+            - ./storage:/var/www/storage
+        command: >
+            bash -c "php artisan migrate --force
+            && php artisan optimize:clear
+            && php artisan optimize
+            && php-fpm"
+        depends_on:
+            - mysql
+        networks:
+            - laravel
+    mysql:
+        image: mysql:8.0
+        container_name: laravel_db
+        restart: unless-stopped
+        env_file:
+            - .env
+        environment:
+            MYSQL_DATABASE: ${DB_DATABASE}
+            MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
+        volumes:
+            - dbdata:/var/lib/mysql/
+        networks:
+            - laravel
+    nginx:
+        image: nginx:alpine
+        container_name: laravel_nginx
+        restart: unless-stopped
+        depends_on:
+            - app
+        ports:
+            - "0.0.0.0:8080:80"
+        volumes:
+            - ./:/var/www
+            - ./nginx:/etc/nginx/conf.d/
+        networks:
+            - laravel
+networks:
+    laravel:
+        driver: bridge
+
+volumes:
+    dbdata:
+        driver: local

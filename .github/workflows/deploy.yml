@@ -1,0 +1,40 @@
+name: Deploy to Server
+
+on:
+  workflow_run:
+    workflows: [ "Tests" ]
+    types:
+      - completed
+  push:
+    branches:
+      - main
+jobs:
+  deploy:
+    runs-on: ubuntu-latest
+    environment: test
+    if: |
+      (github.event_name == 'workflow_run' && github.event.workflow_run.conclusion == 'success') ||
+      (github.event_name == 'push' && github.ref == 'refs/heads/main')
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v2
+
+      - name: Create .env file
+        run: |
+          echo "${{ secrets.APP_ENV }}" > .env
+
+      - name: Install SSH key
+        uses: shimataro/ssh-key-action@v2
+        with:
+          key: ${{ secrets.SERVER_SSH_KEY }}
+          known_hosts: ${{ secrets.KNOWN_HOSTS }}
+
+      - name: Add SSH key to known hosts
+        run: |
+          mkdir -p ~/.ssh
+          ssh-keyscan -H 149.102.129.71 >> ~/.ssh/known_hosts
+
+      - name: Deploy to server
+        run: |
+          scp -r ./* .env forge@149.102.129.71:/var/www/sbRemitTest
+          ssh forge@149.102.129.71 'cd /var/www/sbRemitTest && docker-compose up -d --build'
