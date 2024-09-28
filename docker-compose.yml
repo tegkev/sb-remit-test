@@ -30,7 +30,7 @@ services:
             MYSQL_DATABASE: ${DB_DATABASE}
             MYSQL_ROOT_PASSWORD: ${DB_PASSWORD}
         volumes:
-            - dbdata:/var/lib/mysql/
+            - mysqldata:/var/lib/mysql/
         networks:
             - laravel
     nginx:
@@ -51,5 +51,7 @@ networks:
         driver: bridge
 
 volumes:
-    dbdata:
-        driver: local
+    mysqldata:
+        driver: local-persists
+        driver_opts:
+            mountpoint: /opt/mysql.db
