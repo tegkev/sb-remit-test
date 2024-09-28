@@ -52,6 +52,6 @@ networks:
 
 volumes:
     mysqldata:
-        driver: local-persists
+        driver: local-persist
         driver_opts:
             mountpoint: /opt/mysql.db
