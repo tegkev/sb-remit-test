@@ -4,7 +4,6 @@ services:
         build:
             context: .
             dockerfile: Dockerfile
-        container_name: laravel_backend
         restart: unless-stopped
         env_file:
             - .env
@@ -22,7 +21,6 @@ services:
             - laravel
     mysql:
         image: mysql:8.0
-        container_name: laravel_db
         restart: unless-stopped
         env_file:
             - .env
@@ -35,7 +33,6 @@ services:
             - laravel
     nginx:
         image: nginx:alpine
-        container_name: laravel_nginx
         restart: unless-stopped
         depends_on:
             - app

@@ -37,4 +37,4 @@ jobs:
       - name: Deploy to server
         run: |
           scp -r ./* .env forge@149.102.129.71:/var/www/sbRemitTest
-          ssh forge@149.102.129.71 'cd /var/www/sbRemitTest && docker-compose up -d --build'
+          ssh forge@149.102.129.71 'cd /var/www/sbRemitTest && docker-compose down -v --remove-orphans && docker-compose up -d --build'
